@@ -1,13 +1,11 @@
 /* This is free and unencumbered software released into the public domain. */
 
-/*
 drop table if exists submitters;
 create table submitters(
 	id    integer primary key autoincrement,
 	owner text not null,
 	token text not null
 );
-*/
 
 drop table if exists netdb;
 create table netdb(
@@ -20,6 +18,7 @@ create table netdb(
 	country    text    not null,
 	version    text    not null
 );
+*/
 
 /* TODO: This table needs a lot of information added to it, but it's a start. */
 drop table if exists speeds;

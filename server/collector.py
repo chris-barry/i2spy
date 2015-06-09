@@ -36,7 +36,7 @@ def is_legit(token=''):
 	conn = sqlite3.connect(DATABASE)
 	cur = conn.cursor()
 	#cur.execute('select * from nodes where token = ?;', token)
-	results = cur.execute('select * from nodes where token=?', (token,)).fetchone()
+	results = cur.execute('select * from submitters where token=?', (token,)).fetchone()
 	conn.commit()
 	conn.close()
 	return results
