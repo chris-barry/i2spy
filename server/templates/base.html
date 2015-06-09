@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"> 
+	<meta name="description" content="I2P Network Database Statistics."> 
+	<meta name="generator"   content="todo">
+	<title>
+	I2P Data
+	{% block title %}
+	{% endblock %}
+	</title>
+
+	{#
+	<link rel="stylesheet" href="place.css"/>
+	#}
+	{% block css_extra %}
+	{% endblock %}
+</head>
+<body>
+
+	<h1>netdb stats n' stuff</h1>
+
+	<hr/>
+
+	<noscript><!-- no need to complain --></noscript>
+
+	<div id="content">
+		{% block content%}
+		{% endblock%}
+	</div>
+
+	<hr/>
+
+	<footer id="footer">
+		<!--Last updated at <time>{{time}}+0000</time>. | -->
+		Code is on <a href="https://github.com/chris-barry/i2p-stats">GitHub</a>.
+		| Graphs and data licensed under <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0 1.0 Universal</a>.
+	</footer>
+
+	{% block js_extra %}
+	{% endblock%}
+
+</body>
+</html>
+

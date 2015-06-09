@@ -1,0 +1,48 @@
+{# This is free and unencumbered software released into the public domain. #}
+{% extends 'base.html' %}
+
+{% block title %}
+{% endblock %}
+
+{% block css_extra %}
+<!-- TODO: http://fluidable.com/ -->
+{% endblock %}
+
+{% block js_extra %}
+{% endblock %}
+
+{% block content %}
+<h1>HERE WE GO</h1>
+
+Phase two of this page will include sexy graphs and machine queryable information.
+
+<h2>Total uniques ever seen</h2>
+Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.
+
+<div class="container">
+	<h2 class="one-of-three">Countries</h2>
+	Note: for testing, ?? == unknown as is blank.
+	<ul>
+	{% for country in countries %}
+		<li>{{country.country}} -- {{country.count}}</li>
+	{% endfor %}
+	</ul>
+
+	<h2 class="one-of-three">Versions</h2>
+	<ul>
+	{% for version in versions %}
+		<li>{{version.version}} -- {{version.count}}</li>
+	{% endfor %}
+	</ul>
+
+	<h2 class="one-of-three">Signing Keys</h2>
+	<ul>
+	{% for sign_key in sign_keys %}
+		<li>{{sign_key.sign_key}} -- {{sign_key.count}}</li>
+	{% endfor %}
+	</ul>
+</div>
+
+{% endblock %}
+
+
