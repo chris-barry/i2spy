@@ -24,7 +24,7 @@
 #     select sign_key,count(sign_key) from (select sign_key from netdb group by public_key) group by sign_key;
 
 import argparse, sqlite3, pprint, time
-import i2pcontrol.pyjsonrpc
+import i2py.control.pyjsonrpc
 
 DATABASE='i2stat.db'
 VERSION=1
@@ -45,7 +45,7 @@ def is_legit(token=''):
 def collect(token='', netdb='', local='', version=0):
 
 	if not is_legit(token):
-		raise i2pcontrol.pyjsonrpc.JsonRpcError(
+		raise i2py.control.pyjsonrpc.JsonRpcError(
 			message = u'BAD_TOKEN',
 			data = u'Your token is invalid. Go away or fix it.',
 			code = -666
@@ -93,14 +93,14 @@ def collect(token='', netdb='', local='', version=0):
 	
 	# TODO: i2pcontrol data is not being used yet.
 	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version) values (?,?,?,?,?,?,?)', inserts)
-	#cur.execute('insert into speeds (submitter, activepeers, hucapacitypeers, tunnelsparticipating, time) values (?,?,?,?,?)')
+	cur.execute('insert into speeds (submitter, activepeers, hucapacitypeers, tunnelsparticipating, time) values (?,?,?,?,?)')
 
 	conn.commit()
 	conn.close()
 
 	# This is done last because there should not be critical api changes too often.
 	if version is not VERSION:
-		raise i2pcontrol.pyjsonrpc.JsonRpcError(
+		raise i2py.control.pyjsonrpc.JsonRpcError(
 			message = u'OLD',
 			data = u'You\'re running an old version, please upgrade..',
 			code = -6666
@@ -108,7 +108,7 @@ def collect(token='', netdb='', local='', version=0):
 	return 'good job'
 
 # Jsonrpc class.
-class DataSubmission(i2pcontrol.pyjsonrpc.HttpRequestHandler):
+class DataSubmission(i2py.control.pyjsonrpc.HttpRequestHandler):
 	methods = {
 		'collect':collect
 	}
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 		con.commit()
 		raise SystemExit, 0
 
-	http_server = i2pcontrol.pyjsonrpc.ThreadingHttpServer(
+	http_server = i2py.control.pyjsonrpc.ThreadingHttpServer(
 		server_address = (args.host, args.port),
 		RequestHandlerClass = DataSubmission
 		)

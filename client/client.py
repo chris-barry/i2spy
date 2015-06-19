@@ -6,9 +6,9 @@
 # License: This is free and unencumbered software released into the public domain.
 
 import argparse
-import i2pcontrol
-import netdb
-import i2pcontrol.pyjsonrpc
+import i2py.netdb
+import i2py.control
+import i2py.control.pyjsonrpc
 
 routers = []
 VERSION = 1
@@ -48,27 +48,27 @@ if __name__ == '__main__':
 		print 'Use a token. See --help for usage.'
 		raise SystemExit, 0
 
-	rpc = i2pcontrol.pyjsonrpc.HttpClient(
+	rpc = i2py.control.pyjsonrpc.HttpClient(
 		url = ''.join(['http://',args.server,':',str(args.port)]),
 		gzipped = True
 	)
 	
 	# NetDB Stuff
-	netdb.inspect(hook=print_entry)
+	i2py.netdb.inspect(hook=print_entry)
 
 	# Local router stuff
-	a = i2pcontrol.I2PController()
-	vals = a.getRouterInfo()
+	#a = i2pcontrol.I2PController()
+	#vals = a.getRouterInfo()
 	this_router = {
-		'activepeers'          : vals['i2p.router.netdb.activepeers'],
-		'fastpeers'            : vals['i2p.router.netdb.fastpeers'],
-		'highcapacitypeers'    : vals['i2p.router.netdb.highcapacitypeers'],
-		'tunnelsparticipating' : vals['i2p.router.net.tunnels.participating'],
+		'activepeers'          : 0,
+		'fastpeers'            : 0,
+		'highcapacitypeers'    : 0,
+		'tunnelsparticipating' : 0,
 	}
 
 	try:
 		rpc.collect(token=args.token, netdb=routers, local=this_router, version=VERSION)
-	except i2pcontrol.pyjsonrpc.JsonRpcError, err:
+	except i2py.control.pyjsonrpc.JsonRpcError, err:
 		print 'Error code {}: {} -- {}'.format(err.code, err.message, err.data)
 		
 
