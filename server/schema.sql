@@ -18,7 +18,6 @@ create table netdb(
 	country    text    not null,
 	version    text    not null
 );
-*/
 
 /* TODO: This table needs a lot of information added to it, but it's a start. */
 drop table if exists speeds;
@@ -26,7 +25,7 @@ create table speeds(
 	id                    integer primary key autoincrement,
 	submitter             integer not null,
 	activepeers           text    not null,
-	hucapacitypeers       text    not null,
+	highcapacitypeers     text    not null,
 	tunnelsparticipating  text    not null,
 	time                  text    not null
 );

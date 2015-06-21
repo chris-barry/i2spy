@@ -57,13 +57,13 @@ if __name__ == '__main__':
 	i2py.netdb.inspect(hook=print_entry)
 
 	# Local router stuff
-	#a = i2pcontrol.I2PController()
-	#vals = a.getRouterInfo()
+	a = i2py.control.I2PController()
+	vals = a.get_router_info()
 	this_router = {
-		'activepeers'          : 0,
-		'fastpeers'            : 0,
-		'highcapacitypeers'    : 0,
-		'tunnelsparticipating' : 0,
+		'activepeers'          : vals['i2p.router.netdb.activepeers'],
+		'fastpeers'            : vals['i2p.router.netdb.fastpeers'],
+		'highcapacitypeers'    : vals['i2p.router.netdb.highcapacitypeers'],
+		'tunnelsparticipating' : vals['i2p.router.net.tunnels.participating'],
 	}
 
 	try:

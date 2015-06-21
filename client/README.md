@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-Until the dependencies are on PyPi you have to clone <https://github.com/majestrate/i2p-tools> and install the two components (netdb and i2pcontrol).
+`pip install i2py`
 
 ## Running
 

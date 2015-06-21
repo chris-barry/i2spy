@@ -93,7 +93,7 @@ def collect(token='', netdb='', local='', version=0):
 	
 	# TODO: i2pcontrol data is not being used yet.
 	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version) values (?,?,?,?,?,?,?)', inserts)
-	cur.execute('insert into speeds (submitter, activepeers, hucapacitypeers, tunnelsparticipating, time) values (?,?,?,?,?)')
+	cur.execute('insert into speeds (submitter, activepeers, highcapacitypeers, tunnelsparticipating, time) values (?,?,?,?,?)', [token,local['activepeers'],local['highcapacitypeers'],local['tunnelsparticipating'],submission_time])
 
 	conn.commit()
 	conn.close()

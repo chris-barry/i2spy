@@ -7,6 +7,10 @@ Adding tokens is still a manual process, you have to add them to the nodes table
 
 Collection and viewing are in two parts:
 
+## Dependencies
+
+`pip install Flask i2py`
+
 ## Collection
 
 `python collector.py`
