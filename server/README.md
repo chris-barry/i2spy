@@ -9,7 +9,11 @@ Collection and viewing are in two parts:
 
 ## Dependencies
 
-`pip install Flask i2py`
+`pip install jinja2 i2py matplotlib`
+
+* jinja2 - template engnine
+* i2py - connecting to router information
+* matplotlib - 
 
 ## Collection
 

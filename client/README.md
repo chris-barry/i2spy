@@ -4,6 +4,8 @@
 
 `pip install i2py`
 
+* i2py - connecting to router information
+
 ## Running
 
 Put this in a cronjob for once an hour at a random minute.
