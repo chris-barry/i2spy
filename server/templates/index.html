@@ -5,7 +5,66 @@
 {% endblock %}
 
 {% block css_extra %}
-<!-- TODO: http://fluidable.com/ -->
+<style>
+/* 
+ yacgs{
+	Name: Yet another CSS grid system;
+	Author: Cedric Kleinjung;
+	License: public domain;
+ }
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: top;
+}
+*/
+.row {
+	display: block;
+	vertical-align: top;
+	/* overflow: hidden; */
+	width: 100%;
+}
+
+.one			{ width: 100%; display: inline-block; }
+.one-of-two		{ width: 49.5%; display: inline-block; }
+.one-of-three	{ width: 33%; display: inline-block; }
+.two-of-three	{ width: 66%; display: inline-block; }
+.one-of-four	{ width: 24.75%; display: inline-block; }
+.two-of-four	{ width: 49.5%; display: inline-block; }
+.three-of-four	{ width: 74.25%; display: inline-block; }
+.one-of-five	{ width: 19.8%; display: inline-block; }
+.two-of-five	{ width: 39.6%; display: inline-block; }
+.three-of-five	{ width: 59.4%; display: inline-block; }
+.four-of-five	{ width: 79.2%; display: inline-block; }
+.one-of-six		{ width: 16.5%; display: inline-block; }
+.two-of-six		{ width: 33%; display: inline-block; }
+.three-of-six	{ width: 49.5%; display: inline-block; }
+.four-of-six	{ width: 66%; display: inline-block; }
+.five-of-six	{ width: 82.5%; display: inline-block; }
+
+@media screen and (max-width: 990px){
+	.one			{ width: 100%; display: block; }
+	.one-of-two		{ width: 100%; display: block; }
+	.one-of-three	{ width: 100%; display: block; }
+	.two-of-three	{ width: 100%; display: block; }
+	.one-of-four	{ width: 100%; display: block; }
+	.two-of-four	{ width: 100%; display: block; }
+	.three-of-four	{ width: 100%; display: block; }
+	.one-of-five	{ width: 100%; display: block; }
+	.two-of-five	{ width: 100%; display: block; }
+	.three-of-five	{ width: 100%; display: block; }
+	.four-of-five	{ width: 100%; display: block; }
+	.one-of-six		{ width: 100%; display: block; }
+	.two-of-six		{ width: 100%; display: block; }
+	.three-of-six	{ width: 100%; display: block; }
+	.four-of-six	{ width: 100%; display: block; }
+	.five-of-six	{ width: 100%; display: block; }
+}
+</style>
 {% endblock %}
 
 {% block js_extra %}
@@ -17,30 +76,74 @@
 Phase two of this page will include sexy graphs and machine queryable information.
 
 <h2>Total uniques ever seen</h2>
-Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.
+<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.</p>
 
 <div class="container">
-	<h2 class="one-of-three">Countries</h2>
-	Note: for testing, ?? == unknown as is blank.
-	<ul>
-	{% for country in countries %}
-		<li>{{country.country}} -- {{country.count}}</li>
-	{% endfor %}
-	</ul>
+	<section class="row">
+		<h2>Countries</h2>
+		{#Note: for testing, ?? == unknown as is blank.#}
+		<section class="one-of-two">
+			<table border=2 class="one-of-two">
+				<tr>
+					<th>Country</th>
+					<th>Num.</th>
+				</tr>
+			{% for country in countries %}
+				<tr>
+					<td>{{country[0]}}</td>
+					<td>{{country[1]}}</td>
+				</tr>
+			{% endfor %}
+			<table>
+		</section>
+		<section class="one-of-two">
+			<aside>
+				<img style="top:0" src="country.png"/>
+			</aside>
+		</section>
+	</section>
 
-	<h2 class="one-of-three">Versions</h2>
-	<ul>
-	{% for version in versions %}
-		<li>{{version.version}} -- {{version.count}}</li>
-	{% endfor %}
-	</ul>
+	<hr>
 
-	<h2 class="one-of-three">Signing Keys</h2>
-	<ul>
-	{% for sign_key in sign_keys %}
-		<li>{{sign_key.sign_key}} -- {{sign_key.count}}</li>
-	{% endfor %}
-	</ul>
+	<section class="row">
+		<h2>Versions</h2>
+		<table border=2 class="one-of-two">
+			<tr>
+				<th>Version</th>
+				<th>Num.</th>
+			</tr>
+		{% for version in versions %}
+			<tr>
+				<td>{{version[0]}}</td>
+				<td>{{version[1]}}</td>
+			</tr>
+		{% endfor %}
+		<table>
+		<aside class="one-of-two">
+			<img src="version.png"/>
+		</aside>
+	</section>
+
+	<hr>
+
+	<section class="row">
+		<h2>Signing Keys</h2>
+		<table border=2 class="one-of-two">
+			<tr>
+				<th>Version</th>
+				<th>Num.</th>
+			</tr>
+		{% for sign_key in sign_keys %}
+			<tr>
+				<td>{{sign_key[0]}}</td>
+				<td>{{sign_key[1]}}</td>
+			</tr>
+		{% endfor %}
+		<table>
+		<aside class="one-of-two">
+			<img src="sign_key.png"/>
+		</aside>
+	<section>
 </div>
 
 {% endblock %}
