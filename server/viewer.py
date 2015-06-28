@@ -60,7 +60,6 @@ if __name__ == '__main__':
 
 	conn = sqlite3.connect('i2stat.db')
 
-
 	# Graphs and stuff
 	pie_graph(conn, 'select country,count(country) from (select country from netdb group by public_key) group by country;', args.output_directory+'country.png', 50, False)
 	pie_graph(conn, 'select version,count(version) from (select version from netdb group by public_key) group by version;', args.output_directory+'version.png',  5, False)
@@ -73,12 +72,10 @@ if __name__ == '__main__':
 	versions = query_db(conn, 'select version,count(version) as count  from (select version from netdb group by public_key) group by version order by count desc;')
 	countries = query_db(conn, 'select country,count(country) as count from (select country from netdb where firewalled=0 group by public_key) group by country order by count(country) desc;')
 	sign_keys = query_db(conn, 'select sign_key,count(sign_key) as count from (select sign_key from netdb group by public_key) group by sign_key order by count(sign_key) desc;')
+	sightings = query_db(conn, 'select version,min(submitted) from netdb group by version order by submitted;')
 
-	'''
-	print countries
-	print fw_total
-	print versions
-	'''
+	# The selects should be averages per period. This is a bit messy but should be right.
+	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), cast((time)/(60*60) as int) as time, count(*) as count from speeds group by cast((time)/(60*60) as int) order by time;')
 
 	env = Environment(loader=FileSystemLoader('templates'))
 	template = env.get_template('index.html')
@@ -86,9 +83,11 @@ if __name__ == '__main__':
 		total=total[0][0],
 		ipv6_total=ipv6_total[0][0],
 		fw_total=fw_total[0][0],
+		sightings=sightings,
 		versions=versions,
 		countries=countries,
 		sign_keys=sign_keys,
+		speeds=speeds,
 		time=str(datetime.datetime.utcnow())[:-3]
 	)
 	with open(args.output_directory+'index.html', 'wb') as f:

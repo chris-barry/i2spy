@@ -73,14 +73,49 @@
 {% block content %}
 <h1>HERE WE GO</h1>
 
-Phase two of this page will include sexy graphs and machine queryable information.
+<h2>Network Conditions</h2>
+<p>Some information on internal router states. Currently this buckets the nodes data per hour, and takes a simple average.</p>
+<table border=2>
+	<tr>
+		<th>activepeers</th>
+		<th>highcapacitypeers</th>
+		<th>tunnelsparticipating</th>
+		<th>time (unix time)</th>
+		<th>Nodes reporting in</th>
+	</tr>
+	{% for speed in speeds %}
+	<tr>
+		<td>{{speed[1]}}</td>
+		<td>{{speed[2]}}</td>
+		<td>{{speed[3]}}</td>
+		<td>{{speed[4]*3600}}</td>
+		<td>{{speed[5]}}</td>
+	<tr>
+	{% endfor %}
+</table>
 
-<h2>Total uniques ever seen</h2>
+<h2>NetDB</h2>
 <p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.</p>
 
 <div class="container">
 	<section class="row">
-		<h2>Countries</h2>
+		<h3>Version First Sightings</h3>
+			<table border=2 class="one">
+				<tr>
+					<th>Version</th>
+					<th>Time (unix)</th>
+				</tr>
+				{% for version in sightings %}
+				<tr>
+					<td>{{version[0]}}</td>
+					<td>{{version[1]}}</td>
+				</tr>
+				{% endfor %}
+			</table>
+	</section>
+
+	<section class="row">
+		<h3>Countries</h3>
 		{#Note: for testing, ?? == unknown as is blank.#}
 		<section class="one-of-two">
 			<table border=2 class="one-of-two">
@@ -88,12 +123,12 @@ Phase two of this page will include sexy graphs and machine queryable informatio
 					<th>Country</th>
 					<th>Num.</th>
 				</tr>
-			{% for country in countries %}
+				{% for country in countries %}
 				<tr>
 					<td>{{country[0]}}</td>
 					<td>{{country[1]}}</td>
 				</tr>
-			{% endfor %}
+				{% endfor %}
 			<table>
 		</section>
 		<section class="one-of-two">
@@ -106,7 +141,7 @@ Phase two of this page will include sexy graphs and machine queryable informatio
 	<hr>
 
 	<section class="row">
-		<h2>Versions</h2>
+		<h3>Versions</h3>
 		<table border=2 class="one-of-two">
 			<tr>
 				<th>Version</th>
@@ -127,7 +162,7 @@ Phase two of this page will include sexy graphs and machine queryable informatio
 	<hr>
 
 	<section class="row">
-		<h2>Signing Keys</h2>
+		<h3>Signing Keys</h3>
 		<table border=2 class="one-of-two">
 			<tr>
 				<th>Version</th>
