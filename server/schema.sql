@@ -24,8 +24,8 @@ drop table if exists speeds;
 create table speeds(
 	id                    integer primary key autoincrement,
 	submitter             integer not null,
+	submitted             text    not null,
 	activepeers           text    not null,
 	highcapacitypeers     text    not null,
-	tunnelsparticipating  text    not null,
-	time                  text    not null
+	tunnelsparticipating  text    not null
 );

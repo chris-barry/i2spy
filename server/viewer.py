@@ -63,7 +63,7 @@ if __name__ == '__main__':
 	# Graphs and stuff
 	pie_graph(conn, 'select country,count(country) from (select country from netdb group by public_key) group by country;', args.output_directory+'country.png', 50, False)
 	pie_graph(conn, 'select version,count(version) from (select version from netdb group by public_key) group by version;', args.output_directory+'version.png',  5, False)
-	pie_graph(conn, 'select sign_key,count(sign_key) from (select sign_key from netdb group by public_key) group by sign_key;', args.output_directory+'sign_key.png',  0, True)
+	pie_graph(conn, 'select sign_key,count(sign_key) from (select sign_key from netdb group by public_key) group by sign_key;', args.output_directory+'sign_key.png', 0, True)
 
 	# Numbers and stuff.
 	total = query_db(conn, 'select count(*) from (select public_key,count(public_key) from netdb group by public_key);')
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	sightings = query_db(conn, 'select version,min(submitted) from netdb group by version order by submitted;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.
-	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), cast((time)/(60*60) as int) as time, count(*) as count from speeds group by cast((time)/(60*60) as int) order by time;')
+	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), cast((submitted)/(60*60) as int) as submitted, count(*) as count from speeds group by cast((submitted)/(60*60) as int) order by submitted;')
 
 	env = Environment(loader=FileSystemLoader('templates'))
 	template = env.get_template('index.html')
