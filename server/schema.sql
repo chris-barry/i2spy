@@ -10,7 +10,7 @@ create table submitters(
 drop table if exists netdb;
 create table netdb(
 	id         integer primary key autoincrement,
-	submitted  text    not null,
+	submitted  integer not null,
 	public_key text    not null,
 	sign_key   text    not null,
 	ipv6       text    not null,

@@ -74,12 +74,13 @@
 
 <h2>Network Conditions</h2>
 <p>Some information on internal router states. Currently this buckets the nodes data per hour, and takes a simple average.</p>
+<p>Until data is collected from more routers, there is sure to be gaps.</p>
 <table border=2>
 	<tr>
 		<th>activepeers</th>
 		<th>highcapacitypeers</th>
 		<th>tunnelsparticipating</th>
-		<th>time (unix time)</th>
+		<th>Time (UTC)</th>
 		<th>Nodes reporting in</th>
 	</tr>
 	{% for speed in speeds %}
@@ -87,7 +88,7 @@
 		<td>{{speed[1]}}</td>
 		<td>{{speed[2]}}</td>
 		<td>{{speed[3]}}</td>
-		<td>{{speed[4]*3600}}</td>
+		<td>{{speed[4]}}</td>
 		<td>{{speed[5]}}</td>
 	<tr>
 	{% endfor %}
@@ -102,7 +103,7 @@
 			<table border=2 class="one">
 				<tr>
 					<th>Version</th>
-					<th>Time (unix)</th>
+					<th>Time (UTC)</th>
 				</tr>
 				{% for version in sightings %}
 				<tr>

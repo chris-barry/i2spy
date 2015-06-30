@@ -72,10 +72,11 @@ if __name__ == '__main__':
 	versions = query_db(conn, 'select version,count(version) as count  from (select version from netdb group by public_key) group by version order by count desc;')
 	countries = query_db(conn, 'select country,count(country) as count from (select country from netdb where firewalled=0 group by public_key) group by country order by count(country) desc;')
 	sign_keys = query_db(conn, 'select sign_key,count(sign_key) as count from (select sign_key from netdb group by public_key) group by sign_key order by count(sign_key) desc;')
-	sightings = query_db(conn, 'select version,min(submitted) from netdb group by version order by submitted;')
+	sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.
-	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), cast((submitted)/(60*60) as int) as submitted, count(*) as count from speeds group by cast((submitted)/(60*60) as int) order by submitted;')
+	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), datetime(cast(((submitted)/(3600)) as int)*3600, "unixepoch") as submitted_human, \
+	count(*) as count from speeds group by cast((submitted)/(3600) as int);')
 
 	env = Environment(loader=FileSystemLoader('templates'))
 	template = env.get_template('index.html')
