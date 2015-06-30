@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
 	# Local router stuff
 	try:
-		a = i2py.control.I2PController(address=('127.0.0.1',9999))
+		a = i2py.control.I2PController()
 	except:
 		print 'I2PControl not installed, or router is down.'
 		raise SystemExit, 1
