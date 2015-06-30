@@ -6,6 +6,10 @@
 
 * i2py - connecting to router information
 
+The client expects that [i2pcontrol](http://itoopie.i2p) is installed.
+Due to bugs, the head of the development branch is used right now.
+This will change once a new version is pushed out.
+
 ## Running
 
 Put this in a cronjob for once an hour at a random minute.

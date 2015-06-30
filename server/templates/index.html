@@ -71,33 +71,47 @@
 {% endblock %}
 
 {% block content %}
-
-<h2>Network Conditions</h2>
-<p>Some information on internal router states. Currently this buckets the nodes data per hour, and takes a simple average.</p>
-<p>Until data is collected from more routers, there is sure to be gaps.</p>
-<table border=2>
-	<tr>
-		<th>activepeers</th>
-		<th>highcapacitypeers</th>
-		<th>tunnelsparticipating</th>
-		<th>Time (UTC)</th>
-		<th>Nodes reporting in</th>
-	</tr>
-	{% for speed in speeds %}
-	<tr>
-		<td>{{speed[1]}}</td>
-		<td>{{speed[2]}}</td>
-		<td>{{speed[3]}}</td>
-		<td>{{speed[4]}}</td>
-		<td>{{speed[5]}}</td>
-	<tr>
-	{% endfor %}
-</table>
-
-<h2>NetDB</h2>
-<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.</p>
-
 <div class="container">
+
+	<h2>Network Conditions</h2>
+	<section class="row">
+		<p>
+		Here is some information on internal router states. This currently buckets node data every hour and takes a simple average. There are huge gaps in the data, so don't take it at face value yet.
+		</p>
+		<table border=2>
+			<tr>
+				<th>activepeers</th>
+				<th>highcapacitypeers</th>
+				<th>tunnelsparticipating</th>
+				<th>Time (UTC)</th>
+				<th>Nodes reporting in</th>
+			</tr>
+			{% for speed in speeds %}
+			<tr>
+				<td>{{speed[1]}}</td>
+				<td>{{speed[2]}}</td>
+				<td>{{speed[3]}}</td>
+				<td>{{speed[4]}}</td>
+				<td>{{speed[5]}}</td>
+			<tr>
+			{% endfor %}
+		</table>
+	</section>
+
+	<section class="row">
+		<img src="reporting-in.png"/>
+		<img src="active.png"/>
+		<img src="high-cap.png"/>
+		<img src="tunnels-par.png"/>
+	</section>
+
+	<h2>NetDB</h2>
+
+	<section class="row">
+		<h3>Overview</h3>
+		<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.</p>
+	</section>
+
 	<section class="row">
 		<h3>Version First Sightings</h3>
 			<table border=2 class="one">
@@ -179,6 +193,21 @@
 			<img src="sign_key.png"/>
 		</aside>
 	<section>
+{# NOTE: not sure how I feel on this section.
+	<section class="row">
+		<h2>Citing</h2>
+		<p>If you choose to cite anything from here, this BibTex entry will be useful.</p>
+		<code>
+		<pre>
+@misc{I2P-Data,
+	title = {I2P Data},
+	howpublished = {\url{http://nacl.i2p/i2p-stats/}},
+	note = {Accessed: {{time[:10]}}}
+}
+		</pre>
+		</code>
+	<section>
+#}
 </div>
 
 {% endblock %}

@@ -79,9 +79,11 @@ if __name__ == '__main__':
 		if args.debug:
 			# To check the approximate size of a request, run this. No network call is sent. Results in bytes.
 			# $ python client.py | gzip --stdout | wc --bytes
-			print i2py.control.pyjsonrpc.create_request_json("collect", token=args.token, netdb=routers, local=this_router, version=VERSION)
+			print i2py.control.pyjsonrpc.create_request_json('collect', token=args.token, netdb=routers, local=this_router, version=VERSION)
 		else:
 			rpc.collect(token=args.token, netdb=routers, local=this_router, version=VERSION)
 	except i2py.control.pyjsonrpc.JsonRpcError, err:
 		print 'Error code {}: {} -- {}'.format(err.code, err.message, err.data)
+	except:
+		print 'Could not submit due to other error.'
 		
