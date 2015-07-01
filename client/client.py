@@ -10,6 +10,8 @@ import i2py.netdb
 import i2py.control
 import i2py.control.pyjsonrpc
 
+import os
+
 routers = []
 VERSION = 1
 
@@ -32,6 +34,7 @@ def print_entry(ent):
 		'sign_key'   : n['cert']['signature_type'],
 		'crypto_key' : n['cert']['crypto_type'],
 		'version'    : n['options']['coreVersion'],
+		'caps'       : n['options']['caps'],
 		'country'    : country,
 		'ipv6'       : ipv6,
 		'firewalled' : firewalled,
@@ -40,7 +43,7 @@ def print_entry(ent):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-d', '--debug', help='prints request json instead of sending',type=bool, default=False)
-	parser.add_argument('-i', '--i2p-directory', help='I2P home',type=str, default='~/.i2p/')
+	parser.add_argument('-i', '--i2p-directory', help='I2P home',type=str, default=os.path.join(os.environ['HOME'],'.i2p','netDb'))
 	parser.add_argument('-s', '--server', help='where to send data',type=str, default='tuuql5avhexhn7oq4lhyfythxejgk4qpavxvtniu3u3hwfwkogmq.b32.i2p')
 	parser.add_argument('-p', '--port', help='where to send data',type=int, default='80')
 	parser.add_argument('-t', '--token', help='token to prove yourself',type=str, default='')
@@ -65,13 +68,15 @@ if __name__ == '__main__':
 	ri_vals = a.get_router_info()
 	
 	this_router = {
-		'activepeers'          : ri_vals['i2p.router.netdb.activepeers'],
-		'fastpeers'            : ri_vals['i2p.router.netdb.fastpeers'],
-		'highcapacitypeers'    : ri_vals['i2p.router.netdb.highcapacitypeers'],
-		'tunnelsparticipating' : ri_vals['i2p.router.net.tunnels.participating'],
-		'netDb.writePending'   : a.get_rate(stat='netDb.writePending', period=3600), # TODO: Send more info
+		'activepeers'                       : ri_vals['i2p.router.netdb.activepeers'],
+		'fastpeers'                         : ri_vals['i2p.router.netdb.fastpeers'],
+		'tunnelsparticipating'              : ri_vals['i2p.router.net.tunnels.participating'],
+		'crypto.garlic.decryptFail'         : a.get_rate(stat='crypto.garlic.decryptFail', period=3600),
+		#'peer.failedLookupRate'             : a.get_rate(stat='peer.failedLookupRate', period=3600),
+		'stream.trend'                      : a.get_rate(stat='stream.trend', period=3600),
+		'stream.con.windowSizeAtCongestion' : a.get_rate(stat='stream.con.windowSizeAtCongestion', period=3600),
 	}
-	
+
 	# NetDB Stuff
 	i2py.netdb.inspect(hook=print_entry,netdb_dir=args.i2p_directory)
 

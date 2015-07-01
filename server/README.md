@@ -1,10 +1,5 @@
 # The Server Bits
 
-You have to make a database before you run this.
-To do that, run `python server.py -c`.
-
-Adding tokens is still a manual process, you have to add them to the nodes table.
-
 Collection and viewing are in two parts:
 
 ## Dependencies
@@ -13,13 +8,20 @@ Collection and viewing are in two parts:
 
 * jinja2 - template engnine
 * i2py - connecting to router information
-* matplotlib - 
+* matplotlib - plots
 
 ## Collection
 
-`python collector.py`
+```
+python collector.py --add --username a --token b # Add a user.
+python collector.py -c                           # Create the DB
+python collector.py                              # Listen for submissions
+```
 
-## Viewer
+## Generating Report
 
-`python viewer.py`
+```
+# Make sure you have some data in the database, and the directory is made.
+python viewer.py -o out-dir/
+```
 

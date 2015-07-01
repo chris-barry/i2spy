@@ -81,7 +81,6 @@
 		<table border=2>
 			<tr>
 				<th>activepeers</th>
-				<th>highcapacitypeers</th>
 				<th>tunnelsparticipating</th>
 				<th>Time (UTC)</th>
 				<th>Nodes reporting in</th>
@@ -92,7 +91,6 @@
 				<td>{{speed[2]}}</td>
 				<td>{{speed[3]}}</td>
 				<td>{{speed[4]}}</td>
-				<td>{{speed[5]}}</td>
 			<tr>
 			{% endfor %}
 		</table>
@@ -109,7 +107,13 @@
 
 	<section class="row">
 		<h3>Overview</h3>
-		<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are ipv6, and {{fw_total}} are firewalled.</p>
+		<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are IPv6, and {{fw_total}} are firewalled.</p>
+		<img src="floodfills.png"/>
+		<img src="firewalled.png"/>
+		<img src="ipv6.png"/>
+		<img src="submitted.png"/>
+		<img src="x.png"/>
+		<img src="p.png"/>
 	</section>
 
 	<section class="row">

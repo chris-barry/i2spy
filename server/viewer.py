@@ -77,7 +77,8 @@ if __name__ == '__main__':
 	# Hides collected data that are too small.
 	min_version = 20
 	min_country = 20
-	interval = 3600 # = 60 minutes
+	interval = 3600    # = 60 minutes
+	num_intervals = 24 # 24 hours
 
 	conn = sqlite3.connect('i2stat.db')
 
@@ -104,6 +105,54 @@ if __name__ == '__main__':
 		title='Obverved Signing Keys',
 		lower=0,
 		log=True)
+
+	plot_x_y(conn,
+		query='select count(caps), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%f%" group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'floodfills.png',
+		title='Seen Floodfills',
+		xlab='Time',
+		ylab='Total')
+
+	plot_x_y(conn,
+		query='select count(caps), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%f%" group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'floodfills.png',
+		title='Seen Floodfills',
+		xlab='Time',
+		ylab='Total')
+
+	plot_x_y(conn,
+		query='select count(caps), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%P%" group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'p.png',
+		title='Seen P Cap',
+		xlab='Time',
+		ylab='Total')
+	plot_x_y(conn,
+		query='select count(caps), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%X%" group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'x.png',
+		title='Seen X Cap',
+		xlab='Time',
+		ylab='Total')
+	plot_x_y(conn,
+		query='select count(ipv6), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select ipv6,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where ipv6=1 group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'ipv6.png',
+		title='Seen IPv6',
+		xlab='Time',
+		ylab='Total')
+	plot_x_y(conn,
+		query='select count(firewalled), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where firewalled=1 group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'firewalled.png',
+		title='Seen firewalled',
+		xlab='Time',
+		ylab='Total')
+
+	plot_x_y(conn,
+		query='select count(firewalled), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) group by cast((submitted)/({0}) as int);'.format(interval),
+		output=args.output_directory+'submitted.png',
+		title='Unique Submitted Per Submission',
+		xlab='Time',
+		ylab='Total')
+		
+
 	plot_x_y(conn,
 		query='select count(*) as count, time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int);'.format(interval),
 		output=args.output_directory+'reporting-in.png',
@@ -114,12 +163,6 @@ if __name__ == '__main__':
 		query='select avg(activepeers), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int);'.format(interval),
 		output=args.output_directory+'active.png',
 		title='Average Active Peers',
-		xlab='Time',
-		ylab='Peers')
-	plot_x_y(conn, 
-		query='select avg(highcapacitypeers), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int);'.format(interval),
-		output=args.output_directory+'high-cap.png',
-		title='High Capacity Peers',
 		xlab='Time',
 		ylab='Peers')
 	plot_x_y(conn,
@@ -139,7 +182,7 @@ if __name__ == '__main__':
 	sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.
-	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(highcapacitypeers),avg(tunnelsparticipating), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human, \
+	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(tunnelsparticipating), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human, \
 	count(*) as count from speeds group by cast((submitted)/({0}) as int);'.format(interval))
 
 	env = Environment(loader=FileSystemLoader('templates'))

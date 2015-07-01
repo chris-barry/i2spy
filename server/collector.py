@@ -89,10 +89,11 @@ def collect(token='', netdb='', local='', version=0):
 				code = -704
 			)
 		'''
-		inserts.append((submission_time, router['public_key'], router['sign_key'], router['ipv6'], router['firewalled'], router['country'], router['version']))
+		inserts.append((submission_time, router['public_key'], router['sign_key'], router['ipv6'], router['firewalled'], router['country'], router['version'], router['caps']))
 	
-	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version) values (?,?,?,?,?,?,?)', inserts)
-	cur.execute('insert into speeds (submitter, activepeers, highcapacitypeers, tunnelsparticipating, submitted) values (?,?,?,?,?)', [token,local['activepeers'],local['highcapacitypeers'],local['tunnelsparticipating'],submission_time])
+	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version, caps) values (?,?,?,?,?,?,?,?)', inserts)
+	# TODO: highcappeers is for legacy until I remake the db
+	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, highcapacitypeers) values (?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time,150])
 
 	conn.commit()
 	conn.close()
@@ -115,9 +116,13 @@ class DataSubmission(i2py.control.pyjsonrpc.HttpRequestHandler):
 # when you run this from a cli.
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-w', '--host', help='where to send data', type=str, default='localhost')
-	parser.add_argument('-p', '--port', help='port of host', type=int,default=8080)
+	parser.add_argument('-a', '--add', help='add new user', action='store_true')
 	parser.add_argument('-c', '--create', help='creates a new database (deletes old)', action='store_true')
+	parser.add_argument('-d', '--delete', help='remove a user', action='store_true')
+	parser.add_argument('-p', '--port',  help='port of host', type=int,default=8080)
+	parser.add_argument('-t', '--token', help='token for submitter', type=str, default=None)
+	parser.add_argument('-u', '--user', help='name for submitter', type=str, default=None)
+	parser.add_argument('-w', '--host', help='where to send data', type=str, default='localhost')
 	args = parser.parse_args()
 
 	if args.create:
@@ -126,7 +131,33 @@ if __name__ == '__main__':
 		with open('schema.sql', mode='r') as f:
 			con.cursor().executescript(f.read())
 		con.commit()
+		con.close()
 		raise SystemExit, 0
+	
+	if args.delete:
+		con = sqlite3.connect(DATABASE)
+		user = args.user
+		token = args.token
+		if user is None:
+			print 'Enter a --user.'
+			raise SystemExit, 0
+		con.execute('delete from submitters where owner=?;', [user])
+		con.commit()
+		con.close()
+		raise SystemExit, 0
+		
+	if args.add:
+		con = sqlite3.connect(DATABASE)
+		user = args.user
+		token = args.token
+		if user is None or token is None:
+			print 'Enter a --user and a --token.'
+			raise SystemExit, 0
+		con.execute('insert into submitters (owner,token) values (?,?);', [user,token])
+		con.commit()
+		con.close()
+		raise SystemExit, 0
+		
 
 	http_server = i2py.control.pyjsonrpc.ThreadingHttpServer(
 		server_address = (args.host, args.port),

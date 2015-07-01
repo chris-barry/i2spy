@@ -3,19 +3,21 @@
 drop table if exists submitters;
 create table submitters(
 	id    integer primary key autoincrement,
-	owner text not null,
+	owner text unique not null,
 	token text not null
 );
 
 drop table if exists netdb;
 create table netdb(
 	id         integer primary key autoincrement,
-	submitted  integer not null,
+	submitted  date    not null,
+
+	ipv6       boolean not null,
+	firewalled boolean not null,
 	public_key text    not null,
 	sign_key   text    not null,
-	ipv6       text    not null,
-	firewalled text    not null,
 	country    text    not null,
+	caps       text    not null,
 	version    text    not null
 );
 
@@ -24,8 +26,12 @@ drop table if exists speeds;
 create table speeds(
 	id                    integer primary key autoincrement,
 	submitter             integer not null,
-	submitted             text    not null,
-	activepeers           text    not null,
-	highcapacitypeers     text    not null,
-	tunnelsparticipating  text    not null
+	submitted             date    not null,
+
+	activepeers           integer not null,
+	tunnelsparticipating  integer not null
+	decryptFail           float   not null,
+	failedLookupRate      float   not null,
+	streamtrend           float   not null,
+	windowSizeAtCongestion float   not null
 );
