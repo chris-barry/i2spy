@@ -29,7 +29,7 @@ create table speeds(
 	submitted             date    not null,
 
 	activepeers           integer not null,
-	tunnelsparticipating  integer not null
+	tunnelsparticipating  integer not null,
 	decryptFail           float   not null,
 	failedLookupRate      float   not null,
 	streamtrend           float   not null,

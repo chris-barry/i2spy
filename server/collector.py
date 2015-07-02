@@ -111,8 +111,7 @@ def collect(token='', netdb='', local='', version=0):
 		inserts.append((submission_time, router['public_key'], router['sign_key'], router['ipv6'], router['firewalled'], router['country'], router['version'], router['caps']))
 	
 	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version, caps) values (?,?,?,?,?,?,?,?)', inserts)
-	# TODO: highcappeers is for legacy until I remake the db
-	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, highcapacitypeers, decryptFail, failedLookupRate, streamtrend, windowSizeAtCongestion) values (?,?,?,?,?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time,150, local['decryptFail'],local['failedLookupRate'],local['streamtrend'],local['windowSizeAtCongestion']])
+	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, decryptFail, failedLookupRate, streamtrend, windowSizeAtCongestion) values (?,?,?,?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time, local['decryptFail'],local['failedLookupRate'],local['streamtrend'],local['windowSizeAtCongestion']])
 
 	conn.commit()
 	conn.close()
