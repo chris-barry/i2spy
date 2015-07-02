@@ -68,13 +68,15 @@ if __name__ == '__main__':
 	ri_vals = a.get_router_info()
 	
 	this_router = {
-		'activepeers'                       : ri_vals['i2p.router.netdb.activepeers'],
-		'fastpeers'                         : ri_vals['i2p.router.netdb.fastpeers'],
-		'tunnelsparticipating'              : ri_vals['i2p.router.net.tunnels.participating'],
-		'crypto.garlic.decryptFail'         : a.get_rate(stat='crypto.garlic.decryptFail', period=3600),
-		#'peer.failedLookupRate'             : a.get_rate(stat='peer.failedLookupRate', period=3600),
-		'stream.trend'                      : a.get_rate(stat='stream.trend', period=3600),
-		'stream.con.windowSizeAtCongestion' : a.get_rate(stat='stream.con.windowSizeAtCongestion', period=3600),
+		'activepeers'            : ri_vals['i2p.router.netdb.activepeers'],
+		'fastpeers'              : ri_vals['i2p.router.netdb.fastpeers'],
+		'tunnelsparticipating'   : ri_vals['i2p.router.net.tunnels.participating'],
+		'decryptFail'            : a.get_rate(stat='crypto.garlic.decryptFail', period=3600),
+		# TODO: This is being all weird.
+		#'peer.failedLookupRate' : a.get_rate(stat='peer.failedLookupRate', period=3600),
+		'failedLookupRate'       : 0,
+		'streamtrend'            : a.get_rate(stat='stream.trend', period=3600),
+		'windowSizeAtCongestion' : a.get_rate(stat='stream.con.windowSizeAtCongestion', period=3600),
 	}
 
 	# NetDB Stuff
