@@ -4,7 +4,7 @@ drop table if exists submitters;
 create table submitters(
 	id    integer primary key autoincrement,
 	owner text unique not null,
-	token text not null
+	token text unique not null
 );
 
 drop table if exists netdb;
@@ -35,3 +35,4 @@ create table speeds(
 	streamtrend           float   not null,
 	windowSizeAtCongestion float   not null
 );
+

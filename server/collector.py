@@ -31,28 +31,47 @@ VERSION=1
 conn=''
 db=''
 
-# Determine wheather or not a token is valid. 
-def is_legit(token=''):
-	conn = sqlite3.connect(DATABASE)
+# Figure out if we should even allow a submission.
+def is_legit(conn, token='', version=0):
 	cur = conn.cursor()
-	#cur.execute('select * from nodes where token = ?;', token)
+
 	results = cur.execute('select * from submitters where token=?', (token,)).fetchone()
-	conn.commit()
-	conn.close()
-	return results
+	recent = cur.execute('select submitted from speeds where submitter=? order by submitted desc limit 1;',[token]).fetchone()
 
-# Take data from a node.
-def collect(token='', netdb='', local='', version=0):
-
-	if not is_legit(token):
+	if not results:
+		conn.close()
 		raise i2py.control.pyjsonrpc.JsonRpcError(
 			message = u'BAD_TOKEN',
 			data = u'Your token is invalid. Go away or fix it.',
 			code = -666
 		)
 
-	submission_time = time.time()
+	# Give it 55 minutes to account for some time error.
+	# None means it's new.
+	if recent is not None and (time.time() - float(recent[0])) < 55*60:
+		conn.close()
+		raise i2py.control.pyjsonrpc.JsonRpcError(
+			message = u'SLOW_DOWN',
+			data = u'You are submitting too often.',
+			code = -6667
+		)
+
+	if version is not VERSION:
+		conn.close()
+		raise i2py.control.pyjsonrpc.JsonRpcError(
+			message = u'OLD',
+			data = u'You\'re running an old version, please upgrade..',
+			code = -6668
+		)
+	return True
+
+# Take data from a node.
+def collect(token='', netdb='', local='', version=0):
 	conn = sqlite3.connect(DATABASE)
+
+	is_legit(conn, token, version)
+
+	submission_time = time.time()
 	cur = conn.cursor()
 	inserts = []
 	for router in netdb:
@@ -93,18 +112,11 @@ def collect(token='', netdb='', local='', version=0):
 	
 	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version, caps) values (?,?,?,?,?,?,?,?)', inserts)
 	# TODO: highcappeers is for legacy until I remake the db
-	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, highcapacitypeers) values (?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time,150])
+	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, highcapacitypeers, decryptFail, failedLookupRate, streamtrend, windowSizeAtCongestion) values (?,?,?,?,?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time,150, local['decryptFail'],local['failedLookupRate'],local['streamtrend'],local['windowSizeAtCongestion']])
 
 	conn.commit()
 	conn.close()
 
-	# This is done last because there should not be critical api changes too often.
-	if version is not VERSION:
-		raise i2py.control.pyjsonrpc.JsonRpcError(
-			message = u'OLD',
-			data = u'You\'re running an old version, please upgrade..',
-			code = -6666
-		)
 	return 'good job'
 
 # Jsonrpc class.
