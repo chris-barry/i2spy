@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import sqlite3
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
-import pylab
 
 
 interval = 3600    # = 60 minutes
