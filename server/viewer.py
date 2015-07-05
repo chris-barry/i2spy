@@ -16,18 +16,22 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sqlite3
 import pandas as pd
-
 from jinja2 import Environment, FileSystemLoader
+import pylab
 
 
 interval = 3600    # = 60 minutes
-num_intervals = 20 # = 10 hours
+num_intervals = 24 # = 20 hours
 min_version = 20
 min_country = 20
 # http://i2p-projekt.i2p/en/docs/how/network-database#routerInfo
 # H is left out since it's almost always empty.
 #netdb_caps = ['f','H','K','L','M','N','O','P','R','U','X',]
 netdb_caps = ['f','K','L','M','N','O','P','R','U','X',]
+
+# Used in the plots.
+generation_time = str(datetime.datetime.utcnow())[:-7]
+site = 'http://nacl.i2p/stats'
 
 def query_db(conn, query, args=(), one=False):
 	cur = conn.execute(query, args)
@@ -58,6 +62,7 @@ def pie_graph(conn, query, output, title='', lower=0, log=False):
 			shadow=True,
 			startangle=90,
 	)
+	plt.figtext(.1,.03,'{}\n{} UTC'.format(site,generation_time))
 	plt.axis('equal')
 	plt.legend()
 	plt.title(title)
@@ -69,6 +74,7 @@ def plot_x_y(conn, query, output, title='', xlab='', ylab=''):
 	df['sh'] = pd.to_datetime(df['sh'], unit='s')
 	df = df.set_index('sh')
 	df.head(num_intervals).plot(marker='o')
+	plt.figtext(.1,.03,'{}\n{} UTC'.format(site,generation_time))
 	plt.title(title)
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
@@ -103,8 +109,8 @@ def i2pcontrol_stats(conn, output=''):
 		combined.columns=['time'] + [i[0] for i in tokens]
 		combined = combined.set_index('time')
 
-		# Only 10 hours for now.
 		combined.head(num_intervals).plot(marker='o')
+		plt.figtext(.1,.03,'{}\n{} UTC'.format(site,generation_time))
 		plt.title(thing['stat'])
 		plt.xlabel(thing['xlab'])
 		plt.ylabel(thing['ylab'])
@@ -118,12 +124,10 @@ def reporting_in(conn, output=''):
 	# unix -> human
 	df['sh'] = pd.to_datetime(df['sh'], unit='s')
 	df = df.set_index('sh')
-	''' TODO
-	# We always want to see 0
-	pylab.ylim(ymin=0)
-	'''
 	df.head(num_intervals).plot(marker='o')
+	plt.ylim(ymin=0)
 	plt.title('reporting in')
+	plt.figtext(.1,.03,'{}\n{} UTC'.format(site,generation_time))
 	plt.xlabel('time')
 	plt.ylabel('nodes')
 	plt.savefig('{}/{}.png'.format(output, 'reporting-in'))
@@ -216,7 +220,7 @@ if __name__ == '__main__':
 		sign_keys=sign_keys,
 		speeds=speeds,
 		netdb_caps=netdb_caps,
-		time=str(datetime.datetime.utcnow())[:-3]
+		time=generation_time,
 	)
 	with open(args.output_directory+'index.html', 'wb') as f:
 		f.write(output)
