@@ -4,11 +4,12 @@ Collection and viewing are in two parts:
 
 ## Dependencies
 
-`pip install jinja2 i2py matplotlib`
+`pip install jinja2 i2py matplotlib pandas`
 
 * jinja2 - template engnine
 * i2py - connecting to router information
 * matplotlib - plots
+* pandas - data analysis
 
 ## Collection
 

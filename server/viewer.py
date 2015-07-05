@@ -15,8 +15,19 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sqlite3
+import pandas as pd
 
 from jinja2 import Environment, FileSystemLoader
+
+
+interval = 3600    # = 60 minutes
+num_intervals = 20 # = 10 hours
+min_version = 20
+min_country = 20
+# http://i2p-projekt.i2p/en/docs/how/network-database#routerInfo
+# H is left out since it's almost always empty.
+#netdb_caps = ['f','H','K','L','M','N','O','P','R','U','X',]
+netdb_caps = ['f','K','L','M','N','O','P','R','U','X',]
 
 def query_db(conn, query, args=(), one=False):
 	cur = conn.execute(query, args)
@@ -24,7 +35,7 @@ def query_db(conn, query, args=(), one=False):
 	cur.close()
 	return (rv[0] if rv else None) if one else rv
 
-# TODO: Make less ugly.
+# TODO: Port to Pandas
 def pie_graph(conn, query, output, title='', lower=0, log=False):
 	labels = []
 	sizes = []
@@ -51,58 +62,99 @@ def pie_graph(conn, query, output, title='', lower=0, log=False):
 	plt.legend()
 	plt.title(title)
 	plt.savefig(output)
-	plt.clf()
+	plt.close()
 
-# Plots what is in the 0th column
 def plot_x_y(conn, query, output, title='', xlab='', ylab=''):
-	fig, ax = plt.subplots()
-	res = query_db(conn, query)
-	labels = [i[1] for i in res]
-	y = [i[0] for i in res]
-	x = range(0,len(y))
+	df = pd.read_sql_query(query, conn)
+	df['sh'] = pd.to_datetime(df['sh'], unit='s')
+	df = df.set_index('sh')
+	df.head(num_intervals).plot(marker='o')
 	plt.title(title)
 	plt.xlabel(xlab)
 	plt.ylabel(ylab)
-	plt.xticks(rotation=10)
-	ax.set_xticklabels(labels)
-	plt.plot(x, y)
 	plt.savefig(output)
-	plt.clf()
+	plt.close()
+
+# Plots network traffic.
+def i2pcontrol_stats(conn, output=''):
+	things=[
+		{'stat':'activepeers','xlab':'time','ylab':'total',},
+		{'stat':'tunnelsparticipating','xlab':'time','ylab':'total',},
+		{'stat':'decryptFail','xlab':'time','ylab':'total',},
+		{'stat':'failedLookupRate','xlab':'time','ylab':'total',},
+		{'stat':'streamtrend','xlab':'time','ylab':'total',},
+		{'stat':'windowSizeAtCongestion','xlab':'time','ylab':'total',},
+		#{'stat':'','xlab':'','ylab':'',}, # Template to add more.
+		]
+
+	tokens = query_db(conn, 'select owner,token from submitters;')
+	for thing in things:
+		combined=[]
+		dfs=[]
+		for token in tokens:
+			q = 'select datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh, {1} from speeds where submitter="{2}" group by sh order by sh desc;'.format(interval, thing['stat'], token[1])
+			df = pd.read_sql_query(q, conn)
+			# unix -> human
+			df['sh'] = pd.to_datetime(df['sh'], unit='s')
+			dfs.append(df)
+
+		# Reverse so it's put in left to right
+		combined = reduce(lambda left,right: pd.merge(left,right,on='sh',how='outer'), dfs)
+		combined.columns=['time'] + [i[0] for i in tokens]
+		combined = combined.set_index('time')
+
+		# Only 10 hours for now.
+		combined.head(num_intervals).plot(marker='o')
+		plt.title(thing['stat'])
+		plt.xlabel(thing['xlab'])
+		plt.ylabel(thing['ylab'])
+		plt.savefig('{}/{}.png'.format(output, thing['stat']))
+		plt.close()
+
+# Make plot of how many nodes reported in.
+def reporting_in(conn, output=''):
+	q = 'select count(*) as count, datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh from speeds group by sh order by sh desc;'.format(interval)
+	df = pd.read_sql_query(q, conn)
+	# unix -> human
+	df['sh'] = pd.to_datetime(df['sh'], unit='s')
+	df = df.set_index('sh')
+	''' TODO
+	# We always want to see 0
+	pylab.ylim(ymin=0)
+	'''
+	df.head(num_intervals).plot(marker='o')
+	plt.title('reporting in')
+	plt.xlabel('time')
+	plt.ylabel('nodes')
+	plt.savefig('{}/{}.png'.format(output, 'reporting-in'))
+	plt.close()
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-o', '--output-directory', help='where to save data',type=str, default='./output/')
 	args = parser.parse_args()
 
-	# Hides collected data that are too small.
-	min_version = 20
-	min_country = 20
-	interval = 3600    # = 60 minutes
-	num_intervals = 100 # 24 hours TODO: Use this so we don't plot everything all the time
-	# http://i2p-projekt.i2p/en/docs/how/network-database#routerInfo
-	netdb_caps = ['f','H','K','L','M','N','O','P','R','U','X',]
-
 	conn = sqlite3.connect('i2stat.db')
 
 	# Activate pretty graphs.
-	#plt.style.use('ggplot')
-	plt.xkcd() # If you wanna be fun.
+	plt.style.use('ggplot')
+	#plt.xkcd() # If you wanna be fun.
 
 	# Graphs and stuff
 	pie_graph(conn,
-		query='select country,count(country) from (select country from netdb group by public_key) group by country;',
+		query='select country,count(country) as count from (select country from netdb group by public_key) group by country;',
 		output=args.output_directory+'country.png',
 		title='Observed Countries',
 		lower=min_country,
 		log=False)
 	pie_graph(conn,
-		query='select version,count(version) from (select version from netdb group by public_key) group by version;',
+		query='select version,count(version) as count from (select version from netdb group by public_key) group by version;',
 		output=args.output_directory+'version.png',
 		title='Observed versions',
 		lower=min_version,
 		log=False)
 	pie_graph(conn,
-		query='select sign_key,count(sign_key) from (select sign_key from netdb group by public_key) group by sign_key;',
+		query='select sign_key,count(sign_key) as count from (select sign_key from netdb group by public_key) group by sign_key;',
 		output=args.output_directory+'sign_key.png',
 		title='Obverved Signing Keys',
 		lower=0,
@@ -110,77 +162,34 @@ if __name__ == '__main__':
 
 	for cap in netdb_caps:
 		plot_x_y(conn,
-			query='select count(caps), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%{2}%" group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals, cap),
+			query='select count(caps), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh from (select caps,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where caps like "%{2}%" group by sh order by sh desc;'.format(interval, num_intervals, cap),
 			output=args.output_directory+'{0}.png'.format(cap),
 			title='Seen {0} Cap'.format(cap),
 			xlab='Time',
 			ylab='Total')
 
 	plot_x_y(conn,
-		query='select count(ipv6), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select ipv6,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where ipv6=1 group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
+		query='select count(ipv6), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh from (select ipv6,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where ipv6=1 group by sh order by sh desc;'.format(interval, num_intervals),
 		output=args.output_directory+'ipv6.png',
 		title='Seen IPv6',
 		xlab='Time',
 		ylab='Total')
 	plot_x_y(conn,
-		query='select count(firewalled), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where firewalled=1 group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
+		query='select count(firewalled), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) where firewalled=1 group by sh order by sh desc;'.format(interval, num_intervals),
 		output=args.output_directory+'firewalled.png',
 		title='Seen firewalled',
 		xlab='Time',
 		ylab='Total')
 
 	plot_x_y(conn,
-		query='select count(firewalled), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) group by cast((submitted)/({0}) as int) limit 5;'.format(interval, num_intervals),
+		query='select count(firewalled), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh from (select firewalled,public_key,submitted from netdb group by time(cast(((submitted)/({0})) as int)*{0}, "unixepoch"), public_key) group by sh order by sh desc;'.format(interval, num_intervals),
 		output=args.output_directory+'submitted.png',
 		title='Unique Submitted Per Submission',
 		xlab='Time',
 		ylab='Total')
-		
 
-	plot_x_y(conn,
-		query='select count(*) as count, time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'reporting-in.png',
-		title='Reporting In',
-		xlab='Time',
-		ylab='Total')
-	plot_x_y(conn, 
-		query='select avg(activepeers), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'active.png',
-		title='Average Active Peers',
-		xlab='Time',
-		ylab='Peers')
-	plot_x_y(conn,
-		query='select avg(tunnelsparticipating), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'tunnels-par.png',
-		title='Participating Tunnels',
-		xlab='Time',
-		ylab='Tunnels')
-
-	plot_x_y(conn,
-		query='select avg(decryptFail), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'decryptFail.png',
-		title='DecryptFail',
-		xlab='Time',
-		ylab='Fails')
-	plot_x_y(conn,
-		query='select avg(failedLookupRate), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'failedLookupRate.png',
-		title='Failed Lookup Rate',
-		xlab='Time',
-		ylab='Fails')
-	plot_x_y(conn,
-		query='select avg(streamtrend), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'streamtrend.png',
-		title='StreamTrend',
-		xlab='Time',
-		ylab='???')
-	plot_x_y(conn,
-		query='select avg(windowSizeAtCongestion), time(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals),
-		output=args.output_directory+'windowSizeAtCongestion.png',
-		title='windowSizeAtCongestion',
-		xlab='Time',
-		ylab='Size')
-
+	reporting_in(conn, output=args.output_directory)
+	i2pcontrol_stats(conn, output=args.output_directory)
 
 	# Numbers and stuff.
 	total = query_db(conn, 'select count(*) from (select public_key,count(public_key) from netdb group by public_key);')
@@ -192,8 +201,8 @@ if __name__ == '__main__':
 	sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.
-	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(tunnelsparticipating), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as submitted_human, \
-	count(*) as count from speeds group by cast((submitted)/({0}) as int) limit {1};'.format(interval, num_intervals))
+	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(tunnelsparticipating), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh , \
+	count(*) as count from speeds group by sh limit {1};'.format(interval, num_intervals))
 
 	env = Environment(loader=FileSystemLoader('templates'))
 	template = env.get_template('index.html')

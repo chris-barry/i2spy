@@ -77,7 +77,9 @@
 	<section class="row">
 		<p>
 		Here is some information on internal router states. This currently buckets node data every hour and takes a simple average. There are huge gaps in the data, so don't take it at face value yet.
+		Last 10 hours are shown right now.
 		</p>
+		{#
 		<table border=2>
 			<tr>
 				<th>activepeers</th>
@@ -94,12 +96,13 @@
 			<tr>
 			{% endfor %}
 		</table>
+		#}
 	</section>
 
 	<section class="row">
 		<img src="reporting-in.png"/>
-		<img src="active.png"/>
-		<img src="tunnels-par.png"/>
+		<img src="activepeers.png"/>
+		<img src="tunnelsparticipating.png"/>
 		<img src="decryptFail.png"/>
 		<img src="failedLookupRate.png"/>
 		<img src="streamtrend.png"/>
