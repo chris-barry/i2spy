@@ -11,6 +11,7 @@ import i2py.control
 import i2py.control.pyjsonrpc
 
 import os
+import random
 
 routers = []
 VERSION = 1
@@ -42,19 +43,18 @@ def print_entry(ent):
 	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-c', '--cron', help='prints cron entry',type=bool, default=False)
-	parser.add_argument('-d', '--debug', help='prints request json instead of sending',type=bool, default=False)
+	parser.add_argument('-c', '--cron', help='prints cron entry', action='store_true')
+	parser.add_argument('-d', '--debug', help='prints request json instead of sending', action='store_true')
 	parser.add_argument('-i', '--i2p-directory', help='I2P home',type=str, default=os.path.join(os.environ['HOME'],'.i2p','netDb'))
 	parser.add_argument('-s', '--server', help='where to send data',type=str, default='tuuql5avhexhn7oq4lhyfythxejgk4qpavxvtniu3u3hwfwkogmq.b32.i2p')
 	parser.add_argument('-p', '--port', help='where to send data',type=int, default='80')
 	parser.add_argument('-t', '--token', help='token to prove yourself',type=str, default='')
 	args = parser.parse_args()
 
-	'''
 	if args.cron:
-		print '@hourly http_proxy=\'http://127.0.0.1:4444\' python {}/client/client.py --token $TOKEN'.format(os.getcwd())
+		# Assumes you are running the command from client/
+		print '{} * * * * http_proxy=\'http://127.0.0.1:4444\' python {}/client.py --token $TOKEN'.format(random.randrange(0,55),os.getcwd())
 		raise SystemExit, 1
-	'''
 
 	if not args.token:
 		print 'Use a token. See --help for usage.'
