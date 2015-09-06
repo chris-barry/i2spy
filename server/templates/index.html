@@ -173,11 +173,13 @@
 			<tr>
 				<th>Version</th>
 				<th>Num.</th>
+				<th>%</th>
 			</tr>
 		{% for version in versions %}
 			<tr>
 				<td>{{version[0]}}</td>
 				<td>{{version[1]}}</td>
+				<td>{{(version[1]/total)*100}}</td>
 			</tr>
 		{% endfor %}
 		<table>

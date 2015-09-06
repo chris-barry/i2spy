@@ -32,6 +32,9 @@ netdb_caps = ['f','K','L','M','N','O','P','R','U','X',]
 generation_time = str(datetime.datetime.utcnow())[:-7]
 site = 'http://nacl.i2p/stats'
 
+# Thirty days
+ACTIVE_TIME = 30*24*60*60
+
 def query_db(conn, query, args=(), one=False):
 	cur = conn.execute(query, args)
 	rv = cur.fetchall()
@@ -145,19 +148,19 @@ if __name__ == '__main__':
 
 	# Graphs and stuff
 	pie_graph(conn,
-		query='select country,count(country) as count from (select country from netdb group by public_key) group by country;',
+		query='select country,count(country) as count from (select country from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by country;'.format(ACTIVE_TIME),
 		output=args.output_directory+'country.png',
 		title='Observed Countries',
 		lower=min_country,
 		log=False)
 	pie_graph(conn,
-		query='select version,count(version) as count from (select version from netdb group by public_key) group by version;',
+		query='select version,count(version) as count from (select version from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by version;'.format(ACTIVE_TIME),
 		output=args.output_directory+'version.png',
 		title='Observed versions',
 		lower=min_version,
 		log=False)
 	pie_graph(conn,
-		query='select sign_key,count(sign_key) as count from (select sign_key from netdb group by public_key) group by sign_key;',
+		query='select sign_key,count(sign_key) as count from (select sign_key from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by sign_key;'.format(ACTIVE_TIME),
 		output=args.output_directory+'sign_key.png',
 		title='Obverved Signing Keys',
 		lower=0,
@@ -195,12 +198,12 @@ if __name__ == '__main__':
 	i2pcontrol_stats(conn, output=args.output_directory)
 
 	# Numbers and stuff.
-	total = query_db(conn, 'select count(*) from (select public_key,count(public_key) from netdb group by public_key);')
-	ipv6_total = query_db(conn, 'select count(*) from (select public_key,count(public_key),ipv6 from netdb group by public_key) where ipv6=1;')
-	fw_total = query_db(conn, 'select count(*) from (select public_key,count(public_key),firewalled from netdb group by public_key) where firewalled=1;')
-	versions = query_db(conn, 'select version,count(version) as count from (select version from netdb group by public_key) group by version having count > {} order by count desc;'.format(min_version))
-	countries = query_db(conn, 'select country,count(country) as count from (select country from netdb where firewalled=0 group by public_key) group by country having count >= {} order by count(country) desc;'.format(min_country))
-	sign_keys = query_db(conn, 'select sign_key,count(sign_key) as count from (select sign_key from netdb group by public_key) group by sign_key order by count(sign_key) desc;')
+	total = query_db(conn, 'select count(*) from (select public_key,count(public_key) from netdb where (strftime("%s","now") - submitted < {}) group by public_key);'.format(ACTIVE_TIME))
+	ipv6_total = query_db(conn, 'select count(*) from (select public_key,count(public_key),ipv6 from netdb where (strftime("%s","now") - submitted < {}) group by public_key) where ipv6=1;'.format(ACTIVE_TIME))
+	fw_total = query_db(conn, 'select count(*) from (select public_key,count(public_key),firewalled from netdb where (strftime("%s","now") - submitted < {}) group by public_key) where firewalled=1;'.format(ACTIVE_TIME))
+	versions = query_db(conn, 'select version,count(version) as count from (select version from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by version having count > {} order by count desc;'.format(ACTIVE_TIME,min_version))
+	countries = query_db(conn, 'select country,count(country) as count from (select country from netdb where ((strftime("%s","now") - submitted < {}) and firewalled=0) group by public_key) group by country having count >= {} order by count(country) desc;'.format(ACTIVE_TIME, min_country))
+	sign_keys = query_db(conn, 'select sign_key,count(sign_key) as count from (select sign_key from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by sign_key order by count(sign_key) desc;'.format(ACTIVE_TIME))
 	sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.

@@ -40,6 +40,7 @@ def is_legit(conn, token='', version=0):
 
 	if not results:
 		conn.close()
+		print 'Received invalid submission due to bad token.'
 		raise i2py.control.pyjsonrpc.JsonRpcError(
 			message = u'BAD_TOKEN',
 			data = u'Your token is invalid. Go away or fix it.',
@@ -63,6 +64,7 @@ def is_legit(conn, token='', version=0):
 			data = u'You\'re running an old version, please upgrade..',
 			code = -6668
 		)
+	print 'Got from {}'.format(results)
 	return True
 
 # Take data from a node.
