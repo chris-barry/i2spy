@@ -5,8 +5,8 @@
 `pip install i2py`
 
 * i2py - connecting to router information
-* I2PControl - for quering information from the router
-	* Go to your [client config](http://127.0.0.1:7657/configclients) on your router and install i2p control with this url <http://plugins.i2p/files/I2PControl.xpi2p>.
+* I2PControl - for queering information from the router
+	* Go to your [client config](http://127.0.0.1:7657/configclients) on your router and install I2P control with this URL <http://plugins.i2p/files/I2PControl.xpi2p>.
 	  It's needed near the bottom of the page.
 
 ## Running
@@ -14,6 +14,8 @@
 Put this in a cronjob for once an hour at a random minute.
 
 `http_proxy='http://127.0.0.1:4444'; python client.py --token $TOKEN`.
+
+*NOTE:*: If you use kytv's Debian packaged, please add `-i /var/lib/i2p/i2p-config/netDb/` to the `client.py` parameters.
 
 To generate a crontab entry, you can run:
 

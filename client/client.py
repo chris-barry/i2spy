@@ -6,6 +6,7 @@
 # License: This is free and unencumbered software released into the public domain.
 
 import argparse
+
 import i2py.netdb
 import i2py.control
 import i2py.control.pyjsonrpc
@@ -52,13 +53,13 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	if args.cron:
-		# Assumes you are running the command from client/
-		print '{} * * * * http_proxy=\'http://127.0.0.1:4444\' python {}/client.py --token $TOKEN'.format(random.randrange(0,55),os.getcwd())
-		raise SystemExit, 1
+		# Assumes you are running the command from client.
+		print('{} * * * * http_proxy=\'http://127.0.0.1:4444\' python {}/client.py --token $TOKEN'.format(random.randrange(0,55),os.getcwd()))
+		raise SystemExit(1)
 
 	if not args.token:
-		print 'Use a token. See --help for usage.'
-		raise SystemExit, 1
+		print('Use a token. See --help for usage.')
+		raise SystemExit(1)
 
 	rpc = i2py.control.pyjsonrpc.HttpClient(
 		url = ''.join(['http://',args.server,':',str(args.port)]),
@@ -69,8 +70,8 @@ if __name__ == '__main__':
 	try:
 		a = i2py.control.I2PController()
 	except:
-		print 'I2PControl not installed, or router is down.'
-		raise SystemExit, 1
+		print('I2PControl not installed, or router is down.')
+		raise SystemExit(1)
 
 	ri_vals = a.get_router_info()
 	
@@ -89,15 +90,23 @@ if __name__ == '__main__':
 	# NetDB Stuff
 	i2py.netdb.inspect(hook=print_entry,netdb_dir=args.i2p_directory)
 
-	try:
-		if args.debug:
-			# To check the approximate size of a request, run this. No network call is sent. Results in bytes.
-			# $ python client.py | gzip --stdout | wc --bytes
-			print i2py.control.pyjsonrpc.create_request_json('collect', token=args.token, netdb=routers, local=this_router, version=VERSION)
+	if args.debug:
+		# To check the approximate size of a request, run this. No network call is sent. Results in bytes.
+		# $ python client.py | gzip --stdout | wc --bytes
+		print(i2py.control.pyjsonrpc.create_request_json('collect', token=args.token, netdb=routers, local=this_router, version=VERSION))
+	else:
+		# Try submitting 5 times, delay 10s if it fails.
+		for i in range(5):
+			try:
+				rpc.collect(token=args.token, netdb=routers, local=this_router, version=VERSION)
+				# only reaches if submits
+				break
+			except i2py.control.pyjsonrpc.JsonRpcError, err:
+				print('Error code {}: {} -- {}'.format(err.code, err.message, err.data))
+				break
+			except:
+				print('retrying')
+				time.sleep(10)
 		else:
-			rpc.collect(token=args.token, netdb=routers, local=this_router, version=VERSION)
-	except i2py.control.pyjsonrpc.JsonRpcError, err:
-		print 'Error code {}: {} -- {}'.format(err.code, err.message, err.data)
-	except:
-		print 'Could not submit due to other error.'
+			 print('Could not submit due to other error.')
 		
