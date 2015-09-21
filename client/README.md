@@ -5,7 +5,7 @@
 `pip install i2py`
 
 * i2py - connecting to router information
-* I2PControl - for queering information from the router
+* I2PControl - for querying information from the router
 	* Go to your [client config](http://127.0.0.1:7657/configclients) on your router and install I2P control with this URL <http://plugins.i2p/files/I2PControl.xpi2p>.
 	  It's needed near the bottom of the page.
 
