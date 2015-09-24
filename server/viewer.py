@@ -32,8 +32,13 @@ netdb_caps = ['f','K','L','M','N','O','P','R','U','X',]
 generation_time = str(datetime.datetime.utcnow())[:-7]
 site = 'http://nacl.i2p/stats'
 
-# Thirty days
-ACTIVE_TIME = 30*24*60*60
+
+ONE_DAY = 5*24*60*60
+FIVE_DAYS = 5*24*60*60
+FIFTEEN_DAYS = 15*24*60*60
+THIRTY_DAYS = 30*24*60*60
+
+ACTIVE_TIME = THIRTY_DAYS
 
 def query_db(conn, query, args=(), one=False):
 	cur = conn.execute(query, args)
@@ -156,7 +161,7 @@ if __name__ == '__main__':
 	pie_graph(conn,
 		query='select version,count(version) as count from (select version from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by version;'.format(ACTIVE_TIME),
 		output=args.output_directory+'version.png',
-		title='Observed versions',
+		title='Observed Versions',
 		lower=min_version,
 		log=False)
 	pie_graph(conn,
@@ -204,7 +209,8 @@ if __name__ == '__main__':
 	versions = query_db(conn, 'select version,count(version) as count from (select version from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by version having count > {} order by count desc;'.format(ACTIVE_TIME,min_version))
 	countries = query_db(conn, 'select country,count(country) as count from (select country from netdb where ((strftime("%s","now") - submitted < {}) and firewalled=0) group by public_key) group by country having count >= {} order by count(country) desc;'.format(ACTIVE_TIME, min_country))
 	sign_keys = query_db(conn, 'select sign_key,count(sign_key) as count from (select sign_key from netdb where (strftime("%s","now") - submitted < {}) group by public_key) group by sign_key order by count(sign_key) desc;'.format(ACTIVE_TIME))
-	sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
+	#sightings = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted;')
+	most_recent_version = query_db(conn, 'select version, datetime(min(submitted), "unixepoch") from netdb group by version order by submitted desc limit 1;')
 
 	# The selects should be averages per period. This is a bit messy but should be right.
 	speeds = query_db(conn, 'select submitter,avg(activepeers),avg(tunnelsparticipating), datetime(cast(((submitted)/({0})) as int)*{0}, "unixepoch") as sh , \
@@ -216,7 +222,7 @@ if __name__ == '__main__':
 		total=total[0][0],
 		ipv6_total=ipv6_total[0][0],
 		fw_total=fw_total[0][0],
-		sightings=sightings,
+		most_recent_version=most_recent_version,
 		versions=versions,
 		countries=countries,
 		sign_keys=sign_keys,

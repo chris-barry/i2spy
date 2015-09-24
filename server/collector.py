@@ -47,9 +47,9 @@ def is_legit(conn, token='', version=0):
 			code = -666
 		)
 
-	# Give it 55 minutes to account for some time error.
+	# Give it 80 minutes to account for some time error.
 	# None means it's new.
-	if recent is not None and (time.time() - float(recent[0])) < 55*60:
+	if recent is not None and (time.time() - float(recent[0])) < 80*60:
 		conn.close()
 		raise i2py.control.pyjsonrpc.JsonRpcError(
 			message = u'SLOW_DOWN',

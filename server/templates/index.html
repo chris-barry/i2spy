@@ -115,7 +115,7 @@
 
 	<section class="row">
 		<h3>Overview</h3>
-		<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are IPv6, and {{fw_total}} are firewalled.</p>
+		<p>Total unique routers seen: {{total}}. Of them, {{ipv6_total}} are IPv6, and {{fw_total}} are firewalled. The most recent version is {{most_recent_version[0][0]}}.</p>
 
 		<img src="firewalled.png"/>
 		<img src="ipv6.png"/>
@@ -125,13 +125,15 @@
 		{% endfor %}
 	</section>
 
+	{#
 	<section class="row">
-		<h3>Version First Sightings</h3>
+		<h3>Most Recent Version</h3>
 			<table border=2 class="one">
 				<tr>
 					<th>Version</th>
 					<th>Time (UTC)</th>
 				</tr>
+
 				{% for version in sightings %}
 				<tr>
 					<td>{{version[0]}}</td>
@@ -140,6 +142,7 @@
 				{% endfor %}
 			</table>
 	</section>
+	#}
 
 	<section class="row">
 		<h3>Countries</h3>
