@@ -11,11 +11,16 @@ import i2py.netdb
 import i2py.control
 import i2py.control.pyjsonrpc
 
+import collections
 import os
 import random
+import pyasn
 import time
+import pprint
 
+asndb = ''
 routers = []
+asn = collections.defaultdict(int)
 VERSION = 1
 
 # Aggregreates a buncha data
@@ -31,7 +36,15 @@ def print_entry(ent):
 			ipv6 = 1 if ':' in a.location.ip else 0
 			firewalled = 1 if a.firewalled else 0
 			break
-	
+
+	#for a in n['addrs']:
+	for a in n['addrs']:
+		try:
+			asn[asndb.lookup(a.location.ip)[0]] += 1
+		except:
+			# This generally happens when a node is firewalled.
+			continue
+			
 	routers.append({
 		'public_key' : n['pubkey'],
 		'sign_key'   : n['cert']['signature_type'],
@@ -67,6 +80,8 @@ if __name__ == '__main__':
 		gzipped = True
 	)
 
+	asndb = pyasn.pyasn('ipasn_20150224.dat')
+
 	# Local router stuff
 	try:
 		a = i2py.control.I2PController()
@@ -99,7 +114,7 @@ if __name__ == '__main__':
 		# Try submitting 5 times, delay 10s if it fails.
 		for i in range(5):
 			try:
-				rpc.collect(token=args.token, netdb=routers, local=this_router, version=VERSION)
+				rpc.collect(token=args.token, netdb=routers, local=this_router, asn=asn, version=VERSION)
 				# only reaches if submits
 				break
 			except i2py.control.pyjsonrpc.JsonRpcError, err:

@@ -33,6 +33,13 @@ create table speeds(
 	decryptFail           float   not null,
 	failedLookupRate      float   not null,
 	streamtrend           float   not null,
-	windowSizeAtCongestion float   not null
+	windowSizeAtCongestion float  not null
 );
+drop table if exists asn;
+create table asn (
+	id           integer primary key autoincrement,
+	submitted    date    not null,
 
+	asn          integer,
+	count        integer
+);

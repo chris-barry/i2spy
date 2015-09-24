@@ -68,14 +68,19 @@ def is_legit(conn, token='', version=0):
 	return True
 
 # Take data from a node.
-def collect(token='', netdb='', local='', version=0):
+def collect(token='', netdb='', local='', asn={}, version=0):
 	conn = sqlite3.connect(DATABASE)
 
 	is_legit(conn, token, version)
 
 	submission_time = time.time()
 	cur = conn.cursor()
-	inserts = []
+	r_inserts = []
+	a_inserts = []
+
+	for asn,count in asn.iteritems():
+		a_inserts.append((submission_time,asn,count))
+		
 	for router in netdb:
 		'''
 		# None of these checks are perfect, but they help to filter out bad data.
@@ -110,9 +115,10 @@ def collect(token='', netdb='', local='', version=0):
 				code = -704
 			)
 		'''
-		inserts.append((submission_time, router['public_key'], router['sign_key'], router['ipv6'], router['firewalled'], router['country'], router['version'], router['caps']))
+		r_inserts.append((submission_time, router['public_key'], router['sign_key'], router['ipv6'], router['firewalled'], router['country'], router['version'], router['caps']))
 	
-	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version, caps) values (?,?,?,?,?,?,?,?)', inserts)
+	cur.executemany('insert into netdb (submitted, public_key, sign_key, ipv6, firewalled, country, version, caps) values (?,?,?,?,?,?,?,?)', r_inserts)
+	cur.executemany('insert into asn (submitted, asn, count) values (?,?,?)', a_inserts)
 	cur.execute('insert into speeds (submitter, activepeers, tunnelsparticipating, submitted, decryptFail, failedLookupRate, streamtrend, windowSizeAtCongestion) values (?,?,?,?,?,?,?,?)', [token,local['activepeers'],local['tunnelsparticipating'],submission_time, local['decryptFail'],local['failedLookupRate'],local['streamtrend'],local['windowSizeAtCongestion']])
 
 	conn.commit()

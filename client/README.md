@@ -2,8 +2,9 @@
 
 ## Dependencies
 
-`pip install i2py`
+`pip install i2py pyasn`
 
+* pyasn - to determine what ASNs are used in the network
 * i2py - connecting to router information
 * I2PControl - for querying information from the router
 	* Go to your [client config](http://127.0.0.1:7657/configclients) on your router and install I2P control with this URL <http://plugins.i2p/files/I2PControl.xpi2p>.
@@ -44,5 +45,7 @@ Everything collected will be presented publicly in raw and aggregate forms.
 All data will be available under the creative commons zero license.
 
 ## License
+
+`ipasn_20150224.dat` [MIT license](https://github.com/hadiasghari/pyasn).
 
 [Unlicense](LICENSE).
