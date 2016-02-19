@@ -49,7 +49,7 @@ def print_entry(ent):
 		'public_key' : n['pubkey'],
 		'sign_key'   : n['cert']['signature_type'],
 		'crypto_key' : n['cert']['crypto_type'],
-		'version'    : n['options']['coreVersion'],
+		'version'    : n['options']['router.version'],
 		'caps'       : n['options']['caps'],
 		'country'    : country,
 		'ipv6'       : ipv6,
